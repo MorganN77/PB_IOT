@@ -1,0 +1,94 @@
+from machine import Pin, SoftI2C
+from i2c_lcd import I2cLcd
+from lcd_api import LcdApi
+import time
+import dht
+import time
+from machine import Pin
+
+# DEFINE RELAY
+relay = Pin(19,Pin.OUT)
+relay.value(1) #TURN OFF
+
+relay_F = Pin(4,Pin.OUT)
+relay.value(1) #TURN OFF
+
+#RELAY HEAT TEMPERATURE
+def relay_on():
+    relay.value(0)
+    print('Relay1: ON')
+
+def relay_off():
+    relay.value(1)
+    print('Relay1: OFF')
+
+#RELAY FAN HUMIDITY
+
+def relay_F_on():
+    relay_F.value(0)
+    print('Relay2 ON')
+
+def relay_F_off():
+    relay_F.value(1)
+    print('Relay2 OFF')
+
+#DEFINE TEMP & HUMID
+d = dht.DHT22(Pin(13))
+time.sleep(2)
+
+def get_temp_humid():
+    d.measure()
+    time.sleep(1)
+    temp = d.temperature()
+    humid = d.humidity()
+    text_temp = 'T:{:.1f}C'.format(temp)
+    text_humid = ' H:{:.1f}%'.format(humid)
+    return (text_temp, text_humid, temp, humid)
+    
+tp, th, t, h = get_temp_humid()
+#print(tp)
+
+
+# DEFINE LCD
+i2c = SoftI2C(scl=Pin(22), sda=Pin(21), freq=100000)
+#lcd = I2cLcd(i2c, 0x27, 2, 16) #
+lcd = I2cLcd(i2c, 0x3f, 2, 16)
+
+def show_lcd(line1, line2,):
+    lcd.clear()
+    lcd.backlight_off()
+    lcd.putstr(line1)
+    lcd.putstr(line2)
+
+while True:
+    tp, th, t, h = get_temp_humid()
+    show_lcd(tp,th)
+
+    if t <= 25:
+        relay_on()
+        lcd.backlight_on()
+        lcd.move_to(0,1)
+        lcd.putstr('R1 ON')
+
+    elif t >= 24:
+        relay_off()
+        lcd.move_to(0,1)
+        lcd.putstr('R1 OFF')
+
+    else:
+        pass
+
+    if h >= 60:
+        relay_F_on()
+        lcd.backlight_on()
+        lcd.move_to(0,1)
+        lcd.putstr('R2 ON')
+        
+    elif h <= 55:
+        relay_F_off()
+        lcd.move_to(0,1)
+        lcd.putstr('R2 OFF')
+    else:
+        pass
+    time.sleep(2)
+
