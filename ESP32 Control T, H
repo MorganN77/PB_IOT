@@ -67,28 +67,30 @@ while True:
     if t <= 25:
         relay_on()
         lcd.backlight_on()
-        lcd.move_to(0,1)
-        lcd.putstr('R1 ON')
+        r1 = 'ON'
 
     elif t >= 24:
         relay_off()
-        lcd.move_to(0,1)
-        lcd.putstr('R1 OFF')
-
+        r1 = 'OFF'
     else:
         pass
 
     if h >= 60:
         relay_F_on()
         lcd.backlight_on()
-        lcd.move_to(0,1)
-        lcd.putstr('R2 ON')
+        r2 = 'ON'
         
     elif h <= 55:
         relay_F_off()
-        lcd.move_to(0,1)
-        lcd.putstr('R2 OFF')
+        r2 = 'OFF'
+        
     else:
         pass
+    
+    lcd.move_to(0,1)
+    lcd.putstr('R1 %s R2 %s'%(r1,r2))
+    
     time.sleep(2)
+    
+    
 
